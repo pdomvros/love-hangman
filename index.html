@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Κρεμάλα της Αγάπης</title>
+    <title>Hangman of Love</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,8 +37,8 @@
             text-transform: uppercase;
             cursor: pointer;
         }
-        .player1 { border-color: blue; }
-        .player2 { border-color: red; }
+        .player1 { border-color: #1e90ff; background-color: #e6f7ff; }
+        .player2 { border-color: #ff4500; background-color: #ffe6e6; }
         .hangman {
             font-size: 20px;
             white-space: pre;
@@ -46,41 +46,63 @@
         }
         .frozen { pointer-events: none; opacity: 0.5; }
         .win-message { font-size: 24px; font-weight: bold; color: green; }
+        .creation-credit {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>Κρεμάλα της Αγάπης</h1>
-    <p>Δημιουργία: Παναγιώτης Δόμβρος 2025 (CC BY-NC)</p>
+    <h1>Hangman of Love 💘🎮</h1>
+    <div class="creation-credit">Created by: Panagiotis Dompros 2025 (CC BY-NC)</div>
     
     <div class="game-container">
         <div class="player player1">
-            <h2>Παίκτης 1</h2>
+            <h2>Player 1 💙</h2>
             <p id="hint1"></p>
             <p class="word-display" id="word1"></p>
             <pre class="hangman" id="hangman1"></pre>
             <div class="keyboard" id="keyboard1"></div>
             <p id="message1" class="win-message"></p>
+            <button id="skip1" class="skip-button">I don't like it! 🔄</button>
         </div>
         
         <div class="player player2">
-            <h2>Παίκτης 2</h2>
+            <h2>Player 2 ❤️</h2>
             <p id="hint2"></p>
             <p class="word-display" id="word2"></p>
             <pre class="hangman" id="hangman2"></pre>
             <div class="keyboard" id="keyboard2"></div>
             <p id="message2" class="win-message"></p>
+            <button id="skip2" class="skip-button">I don't like it! 🔄</button>
         </div>
     </div>
     
-    <audio id="errorSound" src="error.mp3"></audio>
+    <audio id="failSound" src="fail-sound.mp3"></audio>
+    <audio id="successSound" src="success-sound.mp3"></audio>
     
     <script>
         const words = [
-            { word: "ΑΓΑΠΗ", hint: "Έντονο συναίσθημα στοργής." },
-            { word: "ΕΡΩΤΑΣ", hint: "Βαθύ συναίσθημα αγάπης και έλξης." },
-            { word: "ΡΟΜΑΝΤΙΚΟ", hint: "Αυτό που δημιουργεί συναισθήματα τρυφερότητας." },
-            { word: "ΠΑΘΟΣ", hint: "Έντονη επιθυμία ή συναίσθημα." },
-            { word: "ΣΥΝΑΙΣΘΗΜΑ", hint: "Κατάσταση της ψυχής." }
+            { word: "LOVE", hint: "A strong feeling of affection." },
+            { word: "ROMANCE", hint: "A feeling of excitement and mystery associated with love." },
+            { word: "PASSION", hint: "Strong and barely controllable emotion." },
+            { word: "EMOTION", hint: "A natural instinctive state of mind." },
+            { word: "FRIENDSHIP", hint: "A mutual affection and trust between people." },
+            { word: "ENTHUSIASM", hint: "Intense and eager enjoyment or interest." },
+            { word: "STORYTELLING", hint: "The art of telling stories." },
+            { word: "HOPE", hint: "A feeling of expectation and desire for a certain thing to happen." },
+            { word: "DREAM", hint: "A series of thoughts, images, and sensations occurring in a person's mind during sleep." },
+            { word: "JOY", hint: "A feeling of great pleasure and happiness." },
+            { word: "BELL", hint: "A device that makes a ringing sound to alert someone." },
+            { word: "MUSIC", hint: "The art of combining sounds and melodies." },
+            { word: "PHOTOGRAPHY", hint: "The art of capturing images." },
+            { word: "STAR", hint: "A celestial body that shines at night." },
+            { word: "SEA", hint: "A large body of saltwater." },
+            { word: "SKY", hint: "The space above the earth." },
+            { word: "LAUGHTER", hint: "A sound expressing happiness." },
+            { word: "FIRE", hint: "A bright and warm flame." },
+            { word: "FLOWER", hint: "The beautiful part of a plant." }
         ];
         
         function setupGame(playerId) {
@@ -89,7 +111,7 @@
             let word = wordObject.word;
             let displayWord = "_".repeat(word.length);
             document.getElementById(`word${playerId}`).textContent = displayWord;
-            document.getElementById(`hint${playerId}`).textContent = "Στοιχείο: " + wordObject.hint;
+            document.getElementById(`hint${playerId}`).textContent = "Hint: " + wordObject.hint;
             let mistakes = 0;
             let hangmanStages = [
                 "\n\n\n\n", 
@@ -104,7 +126,7 @@
             let keyboardDiv = document.getElementById(`keyboard${playerId}`);
             keyboardDiv.innerHTML = "";
             
-            "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ".split('').forEach(letter => {
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(letter => {
                 let button = document.createElement("button");
                 button.textContent = letter;
                 button.addEventListener("click", () => {
@@ -115,7 +137,7 @@
                     } else {
                         mistakes++;
                         document.getElementById(`hangman${playerId}`).textContent = hangmanStages[mistakes];
-                        document.getElementById("errorSound").play();
+                        document.getElementById("failSound").play();
                     }
                     button.disabled = true;
                     
@@ -123,11 +145,18 @@
                         freezeGame(playerId === 1 ? 2 : 1);
                     }
                     if (!displayWord.includes("_")) {
-                        document.getElementById(`message${playerId}`).textContent = "ΜΠΡΑΒΟ! Κέρδισες! 🎉😍";
+                        document.getElementById(`message${playerId}`).textContent = "CONGRATULATIONS! You won! 🎉😍";
+                        document.getElementById("successSound").play();
                         freezeGame(playerId === 2 ? 1 : 2);
                     }
                 });
                 keyboardDiv.appendChild(button);
+            });
+
+            document.getElementById(`skip${playerId}`).addEventListener("click", () => {
+                if (!keyboardDiv.querySelector("button:disabled")) {
+                    setupGame(playerId);
+                }
             });
         }
         
