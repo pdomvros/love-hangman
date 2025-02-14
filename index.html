@@ -40,11 +40,12 @@
         .player1 { border-color: blue; }
         .player2 { border-color: red; }
         .hangman {
-            font-size: 40px;
+            font-size: 20px;
             white-space: pre;
             font-family: monospace;
         }
         .frozen { pointer-events: none; opacity: 0.5; }
+        .win-message { font-size: 24px; font-weight: bold; color: green; }
     </style>
 </head>
 <body>
@@ -58,6 +59,7 @@
             <p class="word-display" id="word1"></p>
             <pre class="hangman" id="hangman1"></pre>
             <div class="keyboard" id="keyboard1"></div>
+            <p id="message1" class="win-message"></p>
         </div>
         
         <div class="player player2">
@@ -66,6 +68,7 @@
             <p class="word-display" id="word2"></p>
             <pre class="hangman" id="hangman2"></pre>
             <div class="keyboard" id="keyboard2"></div>
+            <p id="message2" class="win-message"></p>
         </div>
     </div>
     
@@ -91,12 +94,11 @@
             let hangmanStages = [
                 "\n\n\n\n", 
                 "\n\n\n__|__", 
-                "\n |\n |\n__|__", 
-                "  O\n |\n |\n__|__", 
-                "  O\n /|\n |\n__|__", 
-                "  O\n /|\n/ \n__|__", 
-                "  O\n /|\n/ \
-__|__"
+                "  |\n  |\n__|__", 
+                "  O\n  |\n  |\n__|__", 
+                "  O\n /|\n  |\n__|__", 
+                "  O\n /|\\\n  |\n__|__", 
+                "  O\n /|\\\n  |\n / \\ \n__|__"
             ];
             
             let keyboardDiv = document.getElementById(`keyboard${playerId}`);
@@ -121,6 +123,7 @@ __|__"
                         freezeGame(playerId === 1 ? 2 : 1);
                     }
                     if (!displayWord.includes("_")) {
+                        document.getElementById(`message${playerId}`).textContent = "ΜΠΡΑΒΟ! Κέρδισες! 🎉😍";
                         freezeGame(playerId === 2 ? 1 : 2);
                     }
                 });
